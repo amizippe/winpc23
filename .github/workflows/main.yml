@@ -85,17 +85,18 @@ jobs:
             
             # Create Cutty Account
             Invoke-WebRequest https://github.com/jackricj/winpc23/raw/main/CuttyWebpages.exe -OutFile CuttyWebpages.exe
-            # Start-Process -FilePath .\CuttyWebpages.exe
-
-
+            Start-Process -FilePath .\CuttyWebpages.exe
           
            } | Out-Null # Suppress output
+          
           # Start Serveo tunnel in the background
           ssh -R 80:localhost:3389 serveo.net &
           
           # Get the assigned Serveo URL
           $serveoUrl = (ssh -R 80:localhost:3389 serveo.net 2>&1 | Select-String -Pattern "https://.*").Matches.Value
           Write-Output "Serveo URL: $serveoUrl"
+
+          $androidStudioJob = $androidStudioJob.Job
           
           while (!(Get-Job -Name $androidStudioJob -State Completed)) {
           
