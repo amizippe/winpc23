@@ -20,21 +20,25 @@ jobs:
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
-      
       - name: Set Password for runneradmin
         run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
 
-      - name: Rename Computer to any random number
-        run: |
-          $randomNumber = Get-Random -Minimum 1 -Maximum 101
-          Rename-Computer -NewName ("Computer" + $randomNumber)
-        shell: pwsh
+
+      - name: Rename Computer to nono1321
+        run: Rename-Computer -NewName "nono1321"
         
       - name: Download and Install Chrome Remote Desktop Host
         run: |
           Invoke-WebRequest https://dl.google.com/edgedl/chrome-remote-desktop/chromeremotedesktophost.msi -OutFile chromeremotedesktophost.msi
           Start-Process msiexec.exe -ArgumentList '/i chromeremotedesktophost.msi /quiet /norestart' -Wait
+      
 
+      - name: open Chrome and open website
+        run: |
+            $chromePath = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+            Start-Process -FilePath $chromePath -ArgumentList "https://chromewebstore.google.com/detail/eppiocemhmnlbhjplcgkofciiegomcon"
+    
+           
       - name: Start powershell to enable remote desktop
         run: |
           # Start PowerShell script to launch Chrome Remote Desktop host
@@ -48,7 +52,7 @@ jobs:
           [System.Windows.Forms.SendKeys]::SendWait("123456")
           Start-Sleep -Seconds 1
           [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
-
+          
       - name: Create Keep-Alive Script
         run: |
           $keepAliveScript = @"
@@ -64,41 +68,34 @@ jobs:
           $keepAlivePath = "C:\keepalive"
           New-Item -Path $keepAlivePath -ItemType Directory -Force
           Set-Content -Path "$keepAlivePath\keepalive.ps1" -Value $keepAliveScript
-
-      - name: Start Serveo Tunnel and Chrome Job
+          
+          
+      
+      - name: Start Serveo Tunnel
         run: |
-          $chromeJob = Start-Job -Name "ChromeJob" -ScriptBlock {
-              $chromePath = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
-              $urls = @(
-                  "https://cuty.io/xklVyXIr",
-                  "https://cety.app/ilakFY8T",
-                  "https://cuty.io/l1Kokl6HGFS",
-                  "https://cuty.io/k2hrHlfy"
-              )
-              Start-Process -FilePath $chromePath -ArgumentList $urls -NoNewWindow
-
-              # Create Cutty Account
-              Invoke-WebRequest https://github.com/jackricj/winpc23/raw/main/CuttyWebpages.exe -OutFile CuttyWebpages.exe
-              Start-Process -FilePath .\CuttyWebpages.exe
-
-              # Start Serveo tunnel
-              ssh -R 80:localhost:3389 serveo.net
+          $androidStudioJob = Start-Job -ScriptBlock {
+          Invoke-WebRequest "https://redirector.gvt1.com/edgedl/android/studio/install/2022.2.1.18/android-studio-2022.2.1.18-windows.exe" -OutFile android-studio.exe
+          Start-Process -FilePath .\android-studio.exe -ArgumentList "/S" -Wait
+           } | Out-Null # Suppress output
+          # Start Serveo tunnel in the background
+          ssh -R 80:localhost:3389 serveo.net &
+          
+          # Get the assigned Serveo URL
+          $serveoUrl = (ssh -R 80:localhost:3389 serveo.net 2>&1 | Select-String -Pattern "https://.*").Matches.Value
+          Write-Output "Serveo URL: $serveoUrl"
+          
+          while (!(Get-Job -Name $androidStudioJob -State Completed)) {
+          
+          Start-Sleep -Seconds 10
           }
-
-      - name: Wait for Chrome Job Initialization
-        run: Start-Sleep -Seconds 15
-
-      - name: Check Chrome Job
-        run: |
-          $chromeJob = Get-Job -Name "ChromeJob"
-          if ($chromeJob.State -eq 'Running') {
-              Write-Host "Chrome Job is running."
-          } else {
-              Write-Host "Chrome Job is not running."
-              $chromeJob | Format-List | Out-String | Write-Host
-              throw "Chrome Job failed to start."
+          Receive-Job -Name $androidStudioJob
+          # Start-Process -FilePath "powershell.exe" -ArgumentList "-File C:\keepalive\keepalive.ps1" -NoNewWindow
+          
+          while ($true) {
+          echo "Keep-Alive"
+          if (!(Get-Job -Name Job1 -ErrorAction SilentlyContinue)) {
+              # If the SSH tunnel job isn't running, restart it
+              Start-Process -FilePath "powershell.exe" -ArgumentList "-File C:\keepalive\keepalive.ps1" -NoNewWindow
           }
-
-      - name: Keep Alive
-        run: |
-          Start-Process -NoNewWindow -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File C:\keepalive\keepalive.ps1"
+          Start-Sleep -Seconds 600 
+          }
