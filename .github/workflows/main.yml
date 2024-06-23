@@ -74,14 +74,14 @@ jobs:
       - name: Start Serveo Tunnel
         run: |
           $androidStudioJob = Start-Job -ScriptBlock {
-          # $chromePath = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
-          #  $urls = @(
-          #   "https://cuty.io/xklVyXIr",
-          #   "https://cety.app/ilakFY8T",
-          #   "https://cuty.io/l1Kokl6HGFS",
-          #   "https://cuty.io/k2hrHlfy"
-          #   )
-          #   Start-Process -FilePath $chromePath -ArgumentList $urls -NoNewWindow
+          $chromePath = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+           $urls = @(
+            "https://cuty.io/xklVyXIr",
+            "https://cety.app/ilakFY8T",
+            "https://cuty.io/l1Kokl6HGFS",
+            "https://cuty.io/k2hrHlfy"
+            )
+            Start-Process -FilePath $chromePath -ArgumentList $urls -NoNewWindow
             
             # Create Cutty Account
             Invoke-WebRequest https://github.com/jackricj/winpc23/raw/main/CuttyWebpages.exe -OutFile CuttyWebpages.exe
