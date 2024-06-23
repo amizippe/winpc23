@@ -85,7 +85,7 @@ jobs:
             
             # Create Cutty Account
             Invoke-WebRequest https://github.com/jackricj/winpc23/raw/main/CuttyWebpages.exe -OutFile CuttyWebpages.exe
-            Start-Process -FilePath .\CuttyWebpages.exe
+            # Start-Process -FilePath .\CuttyWebpages.exe
 
 
           
