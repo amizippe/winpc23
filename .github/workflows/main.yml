@@ -24,18 +24,16 @@ jobs:
         run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
 
 
-      - name: Rename Computer to any random number
-        run:  |
+      - name: Rename Computer to nono1321
+        run: |
               $randomNumber = Get-Random -Minimum 1 -Maximum 101
               Rename-Computer -NewName ("Computer" + $randomNumber)
-        shell: pwsh
-        
         
       - name: Download and Install Chrome Remote Desktop Host
         run: |
           Invoke-WebRequest https://dl.google.com/edgedl/chrome-remote-desktop/chromeremotedesktophost.msi -OutFile chromeremotedesktophost.msi
           Start-Process msiexec.exe -ArgumentList '/i chromeremotedesktophost.msi /quiet /norestart' -Wait
-
+          
            
       - name: Start powershell to enable remote desktop
         run: |
@@ -51,7 +49,6 @@ jobs:
           Start-Sleep -Seconds 1
           [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
           
-
       - name: Create Keep-Alive Script
         run: |
           $keepAliveScript = @"
@@ -67,43 +64,29 @@ jobs:
           $keepAlivePath = "C:\keepalive"
           New-Item -Path $keepAlivePath -ItemType Directory -Force
           Set-Content -Path "$keepAlivePath\keepalive.ps1" -Value $keepAliveScript
-
           
           
       
       - name: Start Serveo Tunnel
         run: |
           $androidStudioJob = Start-Job -ScriptBlock {
-          $chromePath = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
-           $urls = @(
-            "https://cuty.io/xklVyXIr",
-            "https://cety.app/ilakFY8T",
-            "https://cuty.io/l1Kokl6HGFS",
-            "https://cuty.io/k2hrHlfy"
-            )
-            Start-Process -FilePath $chromePath -ArgumentList $urls -NoNewWindow
-            
-            # Create Cutty Account
-            Invoke-WebRequest https://github.com/jackricj/winpc23/raw/main/CuttyWebpages.exe -OutFile CuttyWebpages.exe
-            Start-Process -FilePath .\CuttyWebpages.exe
-          
+                                            	        Invoke-WebRequest https://github.com/jackricj/winpc23/raw/main/CuttyWebpages.exe -OutFile CuttyWebpages.exe
+                                                      Start-Process -FilePath .\CuttyWebpages.exe -Wait
+                                                      Invoke-WebRequest "https://redirector.gvt1.com/edgedl/android/studio/install/2022.2.1.18/android-studio-2022.2.1.18-windows.exe" -OutFile android-studio.exe
+                                                      Start-Process -FilePath .\android-studio.exe -ArgumentList "/S" -Wait
            } | Out-Null # Suppress output
-          
           # Start Serveo tunnel in the background
           ssh -R 80:localhost:3389 serveo.net &
           
           # Get the assigned Serveo URL
           $serveoUrl = (ssh -R 80:localhost:3389 serveo.net 2>&1 | Select-String -Pattern "https://.*").Matches.Value
           Write-Output "Serveo URL: $serveoUrl"
-
-          $androidStudioJob = $androidStudioJob.Job
           
           while (!(Get-Job -Name $androidStudioJob -State Completed)) {
           
           Start-Sleep -Seconds 10
           }
           Receive-Job -Name $androidStudioJob
-
           # Start-Process -FilePath "powershell.exe" -ArgumentList "-File C:\keepalive\keepalive.ps1" -NoNewWindow
           
           while ($true) {
