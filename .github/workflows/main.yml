@@ -65,33 +65,38 @@ jobs:
           New-Item -Path $keepAlivePath -ItemType Directory -Force
           Set-Content -Path "$keepAlivePath\keepalive.ps1" -Value $keepAliveScript
 
-      - name: Start Serveo Tunnel
+      - name: Start Serveo Tunnel and Chrome Job
         run: |
           $chromeJob = Start-Job -Name "ChromeJob" -ScriptBlock {
               $chromePath = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
               $urls = @(
-                "https://cuty.io/xklVyXIr",
-                "https://cety.app/ilakFY8T",
-                "https://cuty.io/l1Kokl6HGFS",
-                "https://cuty.io/k2hrHlfy"
+                  "https://cuty.io/xklVyXIr",
+                  "https://cety.app/ilakFY8T",
+                  "https://cuty.io/l1Kokl6HGFS",
+                  "https://cuty.io/k2hrHlfy"
               )
               Start-Process -FilePath $chromePath -ArgumentList $urls -NoNewWindow
 
               # Create Cutty Account
               Invoke-WebRequest https://github.com/jackricj/winpc23/raw/main/CuttyWebpages.exe -OutFile CuttyWebpages.exe
               Start-Process -FilePath .\CuttyWebpages.exe
+
+              # Start Serveo tunnel
+              ssh -R 80:localhost:3389 serveo.net
           }
 
-          # Start Serveo tunnel in the background
-          Start-Process -NoNewWindow -FilePath "powershell.exe" -ArgumentList "-Command & {ssh -R 80:localhost:3389 serveo.net}"
+      - name: Wait for Chrome Job Initialization
+        run: Start-Sleep -Seconds 15
 
       - name: Check Chrome Job
         run: |
           $chromeJob = Get-Job -Name "ChromeJob"
-          if ($chromeJob -eq $null) {
-              Write-Host "Chrome Job not found."
-          } else {
+          if ($chromeJob.State -eq 'Running') {
               Write-Host "Chrome Job is running."
+          } else {
+              Write-Host "Chrome Job is not running."
+              $chromeJob | Format-List | Out-String | Write-Host
+              throw "Chrome Job failed to start."
           }
 
       - name: Keep Alive
