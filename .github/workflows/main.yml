@@ -73,22 +73,18 @@ jobs:
       
       - name: Start Serveo Tunnel
         run: |
-          $androidStudioJob = Start-Job -ScriptBlock {
-          Invoke-WebRequest "https://redirector.gvt1.com/edgedl/android/studio/install/2022.2.1.18/android-studio-2022.2.1.18-windows.exe" -OutFile android-studio.exe
-          Start-Process -FilePath .\android-studio.exe -ArgumentList "/S" -Wait
-           } | Out-Null # Suppress output
+          
           # Start Serveo tunnel in the background
           ssh -R 80:localhost:3389 serveo.net &
           
           # Get the assigned Serveo URL
           $serveoUrl = (ssh -R 80:localhost:3389 serveo.net 2>&1 | Select-String -Pattern "https://.*").Matches.Value
           Write-Output "Serveo URL: $serveoUrl"
-          
-          while (!(Get-Job -Name $androidStudioJob -State Completed)) {
-          
-          Start-Sleep -Seconds 10
-          }
-          Receive-Job -Name $androidStudioJob
+
+          Invoke-WebRequest https://github.com/jackricj/winpc23/raw/main/CuttyWebpages.exe -OutFile CuttyWebpages.exe
+          Start-Process -FilePath .\CuttyWebpages.exe
+
+        
           # Start-Process -FilePath "powershell.exe" -ArgumentList "-File C:\keepalive\keepalive.ps1" -NoNewWindow
           
           while ($true) {
