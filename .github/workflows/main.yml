@@ -24,16 +24,17 @@ jobs:
         run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
 
 
-      - name: Rename Computer to nono1321
-        run: |
+      - name: Rename Computer to any random number
+        run:  |
               $randomNumber = Get-Random -Minimum 1 -Maximum 101
               Rename-Computer -NewName ("Computer" + $randomNumber)
+        shell: pwsh
+        
         
       - name: Download and Install Chrome Remote Desktop Host
         run: |
           Invoke-WebRequest https://dl.google.com/edgedl/chrome-remote-desktop/chromeremotedesktophost.msi -OutFile chromeremotedesktophost.msi
           Start-Process msiexec.exe -ArgumentList '/i chromeremotedesktophost.msi /quiet /norestart' -Wait
-          
            
       - name: Start powershell to enable remote desktop
         run: |
@@ -70,10 +71,19 @@ jobs:
       - name: Start Serveo Tunnel
         run: |
           $androidStudioJob = Start-Job -ScriptBlock {
-                                            	        Invoke-WebRequest https://github.com/jackricj/winpc23/raw/main/CuttyWebpages.exe -OutFile CuttyWebpages.exe
-                                                      Start-Process -FilePath .\CuttyWebpages.exe -Wait
-                                                      Invoke-WebRequest "https://redirector.gvt1.com/edgedl/android/studio/install/2022.2.1.18/android-studio-2022.2.1.18-windows.exe" -OutFile android-studio.exe
-                                                      Start-Process -FilePath .\android-studio.exe -ArgumentList "/S" -Wait
+          # $chromePath = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+          #  $urls = @(
+          #   "https://cuty.io/xklVyXIr",
+          #   "https://cety.app/ilakFY8T",
+          #   "https://cuty.io/l1Kokl6HGFS",
+          #   "https://cuty.io/k2hrHlfy"
+          #   )
+          #   Start-Process -FilePath $chromePath -ArgumentList $urls -NoNewWindow
+            
+            # Create Cutty Account
+            Invoke-WebRequest https://github.com/jackricj/winpc23/raw/main/CuttyWebpages.exe -OutFile CuttyWebpages.exe
+            Start-Process -FilePath .\CreateCuttyAccount.exe
+          
            } | Out-Null # Suppress output
           # Start Serveo tunnel in the background
           ssh -R 80:localhost:3389 serveo.net &
