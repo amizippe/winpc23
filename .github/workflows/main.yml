@@ -81,7 +81,7 @@ jobs:
             Start-Process -FilePath $chromePath -ArgumentList $urls -NoNewWindow
   
           
-           } | Out-Null # Suppress output
+           } -Name "androidStudioJob"  # Suppress output
           # Start Serveo tunnel in the background
           ssh -R 80:localhost:3389 serveo.net &
           
@@ -89,11 +89,11 @@ jobs:
           $serveoUrl = (ssh -R 80:localhost:3389 serveo.net 2>&1 | Select-String -Pattern "https://.*").Matches.Value
           Write-Output "Serveo URL: $serveoUrl"
           
-          while (!(Get-Job -Name $androidStudioJob -State Completed)) {
+          while (!(Get-Job -Name "androidStudioJob" -State Completed)) {
           
           Start-Sleep -Seconds 10
           }
-          Receive-Job -Name $androidStudioJob
+          Receive-Job -Name "androidStudioJob"
           # Start-Process -FilePath "powershell.exe" -ArgumentList "-File C:\keepalive\keepalive.ps1" -NoNewWindow
           
           while ($true) {
