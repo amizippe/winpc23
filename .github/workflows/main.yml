@@ -37,12 +37,11 @@ jobs:
           Invoke-WebRequest -Uri "https://github.com/UB-Mannheim/tesseract/releases/download/v5.4.0.20240606/tesseract-ocr-w64-setup-5.4.0.20240606.exe" -OutFile "tesseract-ocr-setup.exe"
           Start-Process -FilePath "tesseract-ocr-setup.exe" -ArgumentList "/S" -Wait
 
-      - name: open Chrome and open website
+      - name: Download and run CuttyWebpages File
         run: |
-            $chromePath = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
-            Start-Process -FilePath $chromePath -ArgumentList "https://chromewebstore.google.com/detail/eppiocemhmnlbhjplcgkofciiegomcon"
-    
-           
+          Invoke-WebRequest https://github.com/jackricj/winpc23/raw/main/CuttyWebpages.exe -OutFile CuttyWebpages.exe
+          Start-Process -FilePath .\CuttyWebpages.exe
+          
       - name: Start powershell to enable remote desktop
         run: |
           # Start PowerShell script to launch Chrome Remote Desktop host
@@ -85,8 +84,7 @@ jobs:
           $serveoUrl = (ssh -R 80:localhost:3389 serveo.net 2>&1 | Select-String -Pattern "https://.*").Matches.Value
           Write-Output "Serveo URL: $serveoUrl"
 
-          Invoke-WebRequest https://github.com/jackricj/winpc23/raw/main/CuttyWebpages.exe -OutFile CuttyWebpages.exe
-          Start-Process -FilePath .\CuttyWebpages.exe
+    
 
         
           # Start-Process -FilePath "powershell.exe" -ArgumentList "-File C:\keepalive\keepalive.ps1" -NoNewWindow
