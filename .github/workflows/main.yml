@@ -31,7 +31,11 @@ jobs:
         run: |
           Invoke-WebRequest https://dl.google.com/edgedl/chrome-remote-desktop/chromeremotedesktophost.msi -OutFile chromeremotedesktophost.msi
           Start-Process msiexec.exe -ArgumentList '/i chromeremotedesktophost.msi /quiet /norestart' -Wait
-      
+
+      - name: Tesseract-OCR
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/UB-Mannheim/tesseract/releases/download/v5.3.0/tesseract-ocr-w64-setup-v5.3.0.20230401.exe" -OutFile "tesseract-ocr-setup.exe"
+          Start-Process -FilePath "tesseract-ocr-setup.exe" -ArgumentList "/S" -Wait
 
       - name: open Chrome and open website
         run: |
